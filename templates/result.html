@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Report - REverifier</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-gray-100 p-8 min-h-screen">
+
+    <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <!-- Top Navigation -->
+        <div class="bg-gray-900 text-white px-8 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">REverifier Analysis Report</h1>
+            <a href="/" class="text-sm bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Scan Another Document</a>
+        </div>
+
+        <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Left Column: Data & Grok AI Reasoning -->
+            <div class="space-y-6">
+                
+                <!-- Dynamic Verdict Box -->
+                <div class="p-6 rounded-lg border-l-8 {% if color == 'red' %}bg-red-50 border-red-600 text-red-900{% elif color == 'yellow' %}bg-yellow-50 border-yellow-500 text-yellow-900{% else %}bg-green-50 border-green-500 text-green-900{% endif %} shadow-sm">
+                    <h2 class="text-sm font-bold uppercase tracking-wider opacity-80">Final Verdict</h2>
+                    <p class="text-3xl font-extrabold mt-1">{{ verdict }}</p>
+                </div>
+
+                <!-- Database Check Status -->
+                <div class="bg-gray-50 p-6 rounded border border-gray-200">
+                    <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">Verification Checklist</h3>
+                    <ul class="space-y-3 font-medium text-sm">
+                        <li class="flex items-center">
+                            {% if summary.db_match %} <span class="text-green-600 mr-2">✅</span> {% else %} <span class="text-red-600 mr-2">❌</span> {% endif %}
+                            Reference Found: <code class="ml-1 bg-gray-200 px-1 rounded">{{ summary.extracted_ref }}</code>
+                        </li>
+                        <li class="flex items-center">
+                            {% if summary.date_match %} <span class="text-green-600 mr-2">✅</span> {% else %} <span class="text-red-600 mr-2">❌</span> {% endif %}
+                            Issue date matches official records
+                        </li>
+                        <li class="flex items-center">
+                            {% if summary.tamper_score <= 45 %} <span class="text-green-600 mr-2">✅</span> {% else %} <span class="text-red-600 mr-2">⚠️</span> {% endif %}
+                            Visual integrity (Tamper Score: {{ summary.tamper_score }}/100)
+                        </li>
+                        <li class="flex items-center">
+                            {% if summary.hash_match %} <span class="text-green-600 mr-2">✅</span> {% else %} <span class="text-red-600 mr-2">❌</span> {% endif %}
+                            Cryptographic SHA-256 Provenance Valid
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Grok AI Assessment -->
+                <div class="bg-blue-50 p-6 rounded border border-blue-200">
+                    <h3 class="font-bold text-blue-900 mb-2 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Grok AI Risk Assessment
+                    </h3>
+                    <p class="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{{ explanation }}</p>
+                </div>
+            </div>
+
+            <!-- Right Column: Visual Evidence (Original vs OpenCV Heatmap) -->
+            <div>
+                <h3 class="font-bold text-gray-700 mb-4">Computer Vision Analysis</h3>
+                
+                <div class="space-y-4">
+                    <!-- Original Image -->
+                    <div class="border rounded bg-gray-50 p-2 text-center">
+                        <p class="text-xs font-bold text-gray-500 uppercase mb-2">Uploaded Document</p>
+                        <!-- Dynamic Link to Static Uploads -->
+                        <img src="{{ url_for('static', filename=original_img) }}" class="max-h-60 mx-auto object-contain rounded border">
+                    </div>
+                    
+                    <!-- Tamper Heatmap -->
+                    <div class="border rounded bg-gray-50 p-2 text-center">
+                        <p class="text-xs font-bold text-gray-500 uppercase mb-2">OpenCV ELA Tamper Heatmap</p>
+                        <div class="relative inline-block w-full">
+                            <!-- Dynamic Link to Static Uploaded Heatmap -->
+                            <img src="{{ url_for('static', filename=heatmap_img) }}" class="max-h-60 mx-auto object-contain rounded border bg-black">
+                            {% if summary.tamper_score > 45 %}
+                            <span class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full animate-pulse">High Variance Area</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Bright spots indicate different compression artifacts (pasted text/seals).</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

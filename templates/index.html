@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REverifier | Document Verification</title>
+    <style>
+        /* =========================================
+           RESET
+        ========================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: Arial, Helvetica, sans-serif; background: #07111f; color: white; line-height: 1.6; }
+        a { text-decoration: none; }
+
+        /* =========================================
+           NAVBAR
+        ========================================= */
+        .navbar { height: 72px; padding: 0 8%; display: flex; align-items: center; justify-content: space-between; background: #0a192a; border-bottom: 1px solid #1d344b; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 25px; font-weight: 700; }
+        .logo span { color: #26c6f7; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { color: #b7c5d4; font-size: 15px; transition: 0.3s; }
+        .nav-links a:hover { color: #26c6f7; }
+
+        /* =========================================
+           COMMON
+        ========================================= */
+        .page { min-height: 100vh; }
+        .small-title { color: #26c6f7; font-size: 12px; font-weight: bold; letter-spacing: 2px; margin-bottom: 18px; }
+        .section-heading { text-align: center; margin-bottom: 50px; }
+        .section-heading h1 { font-size: 42px; margin-bottom: 12px; }
+        .section-heading h2 { font-size: 38px; margin-bottom: 10px; }
+        .section-heading p { color: #8497aa; }
+
+        /* =========================================
+           BUTTONS
+        ========================================= */
+        .primary-button { display: inline-block; background: #26c6f7; color: #04111d; padding: 14px 25px; border-radius: 8px; font-weight: bold; font-size: 14px; border: none; cursor: pointer; transition: 0.3s; }
+        .primary-button:hover { background: #65dcff; transform: translateY(-2px); }
+        .secondary-button { display: inline-block; color: white; border: 1px solid #3b5269; padding: 13px 25px; border-radius: 8px; margin-left: 10px; font-weight: bold; font-size: 14px; }
+        .secondary-button:hover { border-color: #26c6f7; color: #26c6f7; }
+
+        /* =========================================
+           HOME PAGE
+        ========================================= */
+        #home { min-height: 100vh; }
+        .hero { min-height: 650px; padding: 90px 8%; display: flex; align-items: center; justify-content: space-between; gap: 60px; }
+        .hero-content { max-width: 650px; }
+        .hero h1 { font-size: 58px; line-height: 1.1; margin-bottom: 25px; }
+        .hero h1 span { color: #26c6f7; }
+        .hero-content > p { color: #96a9bd; font-size: 17px; line-height: 1.8; margin-bottom: 32px; }
+        .hero-buttons { display: flex; align-items: center; }
+
+        /* =========================================
+           HERO CARD
+        ========================================= */
+        .hero-card { width: 410px; background: #0d2034; border: 1px solid #1d3b54; border-radius: 15px; padding: 25px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); }
+        .card-header { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 20px; color: #8297aa; }
+        .online { color: #42e3a3; }
+        .document { background: #f5f7fa; color: #172231; padding: 30px; border-radius: 7px; }
+        .document-heading { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
+        .document-line { height: 3px; background: #d8dee5; margin-bottom: 25px; }
+        .document-row { display: flex; justify-content: space-between; gap: 20px; padding: 15px 0; border-bottom: 1px solid #e1e5e9; font-size: 12px; }
+        .document-row span { color: #6b7785; }
+        .safe { color: #159b6b; }
+
+        /* =========================================
+           FEATURES
+        ========================================= */
+        .features { padding: 90px 8%; background: #091827; }
+        .feature-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .feature-card { background: #0d2034; border: 1px solid #1d3b54; padding: 28px; border-radius: 12px; transition: 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); border-color: #26c6f7; }
+        .number { color: #26c6f7; font-size: 13px; font-weight: bold; }
+        .feature-card h3 { margin: 15px 0 10px; }
+        .feature-card p { color: #879bad; font-size: 14px; }
+
+        /* =========================================
+           CTA
+        ========================================= */
+        .cta { padding: 90px 8%; text-align: center; }
+        .cta h2 { font-size: 34px; margin-bottom: 10px; }
+        .cta p { color: #899bad; margin-bottom: 25px; }
+
+        /* =========================================
+           VERIFY PAGE
+        ========================================= */
+        #verify { padding: 90px 8%; min-height: 100vh; }
+        .upload-box { max-width: 750px; margin: 0 auto 60px; padding: 55px 40px; text-align: center; background: #0d2034; border: 1px solid #1d3b54; border-radius: 15px; }
+        .upload-icon { font-size: 55px; margin-bottom: 20px; }
+        .upload-box h2 { font-size: 26px; margin-bottom: 8px; }
+        .upload-box > p { color: #879bad; }
+        .file-input-container { margin: 30px 0 10px; }
+        .file-input-container input { color: white; max-width: 100%; margin-left: 70px; }
+        .upload-note { font-size: 12px; margin-bottom: 25px; }
+
+        /* =========================================
+           PROCESS CARDS
+        ========================================= */
+        .verification-process { max-width: 1100px; margin: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        .process-card { background: #0d2034; border: 1px solid #1d3b54; border-radius: 12px; padding: 25px; }
+        .process-number { color: #26c6f7; font-weight: bold; font-size: 13px; }
+        .process-card h3 { margin: 14px 0 8px; }
+        .process-card p { color: #879bad; font-size: 14px; }
+
+        /* =========================================
+           RESULT PAGE & BADGES
+        ========================================= */
+        #result { padding: 90px 8%; min-height: 100vh; background: #091827; }
+        .result-box { max-width: 1000px; margin: auto; background: #0d2034; border: 1px solid #1d3b54; border-radius: 15px; padding: 30px; }
+        .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+        .result-label { color: #73889c; font-size: 11px; letter-spacing: 1px; }
+        .result-header h2 { color: #26c6f7; font-size: 20px; margin-top: 6px; }
+        .status { background: #123b31; color: #42e3a3; padding: 8px 15px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .status.error-status { background: #3b1212; color: #e34242; border: 1px solid #e34242; }
+        
+        .status-badge { padding: 8px 15px; border-radius: 20px; font-size: 11px; font-weight: bold; margin-left: 10px; display: inline-block; }
+        .badge-safe { background: #123b31; color: #42e3a3; border: 1px solid #42e3a3; }
+        .badge-warning { background: #3b3312; color: #f4c95d; border: 1px solid #f4c95d; }
+        .badge-danger { background: #3b1212; color: #e34242; border: 1px solid #e34242; }
+
+        .analysis-box { margin-top: 25px; padding: 28px; background: #07111f; border-radius: 10px; }
+        .analysis-box h3 { color: #26c6f7; margin-bottom: 15px; }
+        .analysis-box p { color: #b7c4d1; line-height: 1.8; margin-bottom: 20px; white-space: pre-wrap; font-family: monospace; font-size: 14px;}
+        .markdown-body { color: #b7c4d1; font-size: 14px; line-height: 1.8; font-family: monospace; }
+        .markdown-body p, .markdown-body ul { margin-bottom: 15px; }
+        .markdown-body strong { color: #42e3a3; }
+        .result-buttons { text-align: center; margin-top: 30px; }
+
+        /* =========================================
+           ABOUT PAGE
+        ========================================= */
+        #about { padding: 90px 8%; min-height: 100vh; }
+        .about-grid { max-width: 1000px; margin: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .about-card { background: #0d2034; border: 1px solid #1d3b54; border-radius: 12px; padding: 30px; }
+        .about-icon { font-size: 35px; margin-bottom: 15px; }
+        .about-card h2 { color: #26c6f7; margin-bottom: 10px; }
+        .about-card p { color: #879bad; line-height: 1.7; }
+        .technology-section { max-width: 1000px; margin: 60px auto 30px; text-align: center; }
+        .technology-section h2 { margin-bottom: 25px; }
+        .pipeline { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .pipeline-item { padding: 13px 20px; background: #10263d; border: 1px solid #1d3b54; border-radius: 8px; color: #26c6f7; font-weight: bold; font-size: 13px; }
+        .arrow { color: #60778c; }
+        .warning-box { max-width: 1000px; margin: 30px auto; padding: 25px; background: #1b190d; border: 1px solid #5b4d1c; border-radius: 10px; }
+        .warning-box h3 { color: #f4c95d; margin-bottom: 8px; }
+        .warning-box p { color: #b7a96f; }
+        footer { padding: 30px; background: #050d17; text-align: center; color: #687c90; font-size: 13px; }
+
+        @media (max-width: 900px) {
+            .hero { flex-direction: column; text-align: center; }
+            .hero-card { width: 100%; max-width: 410px; }
+            .hero-buttons { justify-content: center; }
+            .feature-container, .verification-process { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .navbar { padding: 0 5%; }
+            .nav-links { gap: 12px; }
+            .nav-links a { font-size: 12px; }
+            .hero h1 { font-size: 40px; }
+            .hero-buttons { flex-direction: column; gap: 15px; }
+            .secondary-button { margin-left: 0; }
+            .feature-container, .verification-process, .result-grid, .about-grid { grid-template-columns: 1fr; }
+            .result-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">RE<span>verifier</span></div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#verify">Verify</a>
+            <a href="#result">Result</a>
+            <a href="#about">About</a>
+        </div>
+    </nav>
+
+    <section id="home" class="page">
+        <div class="hero">
+            <div class="hero-content">
+                <div class="small-title">DOCUMENT VERIFICATION PLATFORM</div>
+                <h1>Verify Documents. <span>Build Trust.</span></h1>
+                <p>REverifier is an advanced document verification platform designed to help users understand, analyze, and authenticate important files.</p>
+                <div class="hero-buttons">
+                    <a href="#verify" class="primary-button">Verify Document</a>
+                    <a href="#about" class="secondary-button">Learn More</a>
+                </div>
+            </div>
+            <div class="hero-card">
+                <div class="card-header">
+                    <span>REVERIFIER SYSTEM</span>
+                    <span class="online">● ONLINE</span>
+                </div>
+                <div class="document">
+                    <div class="document-heading">DOCUMENT</div>
+                    <div class="document-line"></div>
+                    <div class="document-row"><span>Document Type</span><strong>Official</strong></div>
+                    <div class="document-row"><span>Reference</span><strong>DOC/2026/1042</strong></div>
+                    <div class="document-row"><span>Status</span><strong class="safe">ANALYSIS READY</strong></div>
+                </div>
+            </div>
+        </div>
+        
+        <section class="features">
+            <div class="section-heading">
+                <div class="small-title">PROCESS</div>
+                <h2>How REverifier Works</h2>
+                <p>A simple, intelligent document verification workflow.</p>
+            </div>
+            <div class="feature-container">
+                <div class="feature-card"><div class="number">01</div><h3>Upload</h3><p>Upload your document through the secure verification portal.</p></div>
+                <div class="feature-card"><div class="number">02</div><h3>Extract</h3><p>Text, structure, and hidden metadata are extracted safely.</p></div>
+                <div class="feature-card"><div class="number">03</div><h3>Analyze</h3><p>Forensic algorithms analyze contents for anomalies or edits.</p></div>
+                <div class="feature-card"><div class="number">04</div><h3>Result</h3><p>Receive a clear, actionable verification report instantly.</p></div>
+            </div>
+        </section>
+
+        <section class="cta">
+            <h2>Ready to check a document?</h2>
+            <p>Start your document verification process.</p>
+            <a href="#verify" class="primary-button">Start Verification</a>
+        </section>
+    </section>
+
+    <section id="verify" class="page">
+        <div class="section-heading">
+            <div class="small-title">DOCUMENT VERIFICATION</div>
+            <h1>Upload Your Document</h1>
+            <p>Select a document to begin the verification process.</p>
+        </div>
+
+        <div class="upload-box">
+            <div class="upload-icon">📄</div>
+            <h2>Select Document</h2>
+            <p>Supported formats: PDF, TXT</p>
+            
+            <form action="/verify" method="POST" enctype="multipart/form-data">
+                <div class="file-input-container">
+                    <input type="file" name="document" accept=".pdf,.txt" required>
+                </div>
+                <p class="upload-note">Maximum recommended file size: 10 MB</p>
+                <button type="submit" class="primary-button" onclick="this.innerHTML='Analyzing... Please wait';">Start Verification</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="result" class="page">
+        <div class="section-heading">
+            <div class="small-title">VERIFICATION REPORT</div>
+            <h1>Document Analysis</h1>
+            <p>Automated Forensic Intelligence</p>
+        </div>
+
+        <div class="result-box">
+            {% if result and result.filename %}
+                <div class="result-header">
+                    <div>
+                        <p class="result-label">DOCUMENT</p>
+                        <h2>{{ result.filename }}</h2>
+                    </div>
+                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px;">
+                        <div class="status {% if result.status == 'ERROR' %}error-status{% endif %}">
+                            {{ result.status }}
+                        </div>
+                        
+                        <!-- DYNAMIC SECURITY BADGE -->
+                        {% if result.status != 'ERROR' %}
+                            <div id="dynamic-security-badge" class="status-badge">Analyzing Security...</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if result.status == 'ERROR' %}
+                    <div class="analysis-box" style="border: 1px solid #e34242;">
+                        <h3 style="color: #e34242;">Verification Error</h3>
+                        <p>{{ result.error }}</p>
+                    </div>
+                {% else %}
+                    <div class="analysis-box">
+                        <h3>Security & Forgery Assessment</h3>
+                        <div id="formatted-analysis" class="markdown-body"></div>
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <div class="result-header">
+                    <div>
+                        <p class="result-label">DOCUMENT</p>
+                        <h2>No document uploaded</h2>
+                    </div>
+                    <div class="status">WAITING</div>
+                </div>
+                <div class="analysis-box">
+                    <h3>Security Assessment</h3>
+                    <p>Upload a document in the Verify section to see the security report here.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="result-buttons">
+            <a href="#verify" class="primary-button">Verify Another Document</a>
+            <a href="#home" class="secondary-button">Back Home</a>
+        </div>
+    </section>
+
+    <section id="about" class="page">
+        <div class="section-heading">
+            <div class="small-title">ABOUT REVERIFIER</div>
+            <h1>Building Trust in Documents</h1>
+            <p>A simple platform for document understanding and verification.</p>
+        </div>
+        
+        <div class="about-grid">
+            <div class="about-card"><div class="about-icon">🔍</div><h2>Document Analysis</h2><p>REverifier is designed to help users understand the contents of important documents.</p></div>
+            <div class="about-card"><div class="about-icon">📄</div><h2>Document Extraction</h2><p>Information from documents can be extracted and organized into an easier-to-understand format.</p></div>
+            <div class="about-card"><div class="about-icon">🛡</div><h2>Fraud Detection</h2><p>Identify tampered metadata, digital edits, and manipulated text instantly.</p></div>
+            <div class="about-card"><div class="about-icon">📊</div><h2>Trust & Safety</h2><p>The goal is to provide users with actionable intelligence while clearly communicating security risks.</p></div>
+        </div>
+
+        <div class="technology-section">
+            <h2>Verification Pipeline</h2>
+            <div class="pipeline">
+                <div class="pipeline-item">Upload</div><div class="arrow">→</div>
+                <div class="pipeline-item">Data Extraction</div><div class="arrow">→</div>
+                <div class="pipeline-item">Forensic Processing</div><div class="arrow">→</div>
+                <div class="pipeline-item">Final Result</div>
+            </div>
+        </div>
+        
+        <div class="warning-box">
+            <h3>Advanced Processing</h3>
+            <p>This system uses cutting-edge forensic analysis to parse text, images, and embedded metadata to generate structured intelligence reports locally.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 REverifier - Buildathon Submission</p>
+    </footer>
+
+    <!-- 1. HIDDEN JSON BLOCK (SAFE FROM JS ERRORS) -->
+    <script id="raw-data" type="application/json">
+        {{ result.analysis | tojson }}
+    </script>
+
+    <!-- 2. MAIN EXECUTION SCRIPT -->
+    <script>
+        // Auto-scroll to results page
+        if (window.location.pathname === '/result') {
+            window.location.hash = '#result';
+        }
+
+        // Safely extract and format data
+        try {
+            let dataElement = document.getElementById('raw-data');
+            
+            if (dataElement) {
+                let textContent = dataElement.textContent;
+                
+                // Only process if it's not empty
+                if (textContent && textContent.trim() !== '""' && textContent.trim() !== 'null') {
+                    let rawAnalysis = JSON.parse(textContent);
+                    
+                    if (rawAnalysis && rawAnalysis.trim() !== '') {
+                        
+                        // Strip internal thinking tags
+                        rawAnalysis = rawAnalysis.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+                        
+                        // Apply Security Badges
+                        let badgeElement = document.getElementById('dynamic-security-badge');
+                        if (badgeElement) {
+                            let lowerText = rawAnalysis.toLowerCase();
+                            
+                            if (lowerText.includes("high risk") || lowerText.includes("potential forgery") || lowerText.includes("severely tampered")) {
+                                badgeElement.className = "status-badge badge-danger";
+                                badgeElement.innerHTML = "🔴 HIGH RISK / FORGERY";
+                            } 
+                            else if (lowerText.includes("warning") || lowerText.includes("requires review") || lowerText.includes("modified")) {
+                                badgeElement.className = "status-badge badge-warning";
+                                badgeElement.innerHTML = "🟡 MODERATE RISK / WARNING";
+                            } 
+                            else {
+                                badgeElement.className = "status-badge badge-safe";
+                                badgeElement.innerHTML = "🟢 LIKELY AUTHENTIC";
+                            }
+                        }
+
+                        // Format Markdown
+                        let analysisContainer = document.getElementById('formatted-analysis');
+                        if (analysisContainer) {
+                            analysisContainer.innerHTML = marked.parse(rawAnalysis);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.log("Analysis pending...");
+        }
+    </script>
+</body>
+</html>

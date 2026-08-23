@@ -69,7 +69,7 @@ def extract_pdf_data(file_path):
             
             # Extract standard image if page is mostly visual
             if len(page_text) < 50:
-                pix = page.get_pixmap(dpi=60)
+                pix = page.get_pixmap(dpi=45)
                 img = Image.open(io.BytesIO(pix.tobytes("png")))
                 
                 if img.width > 500:

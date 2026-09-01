@@ -11,7 +11,7 @@ import re
 # ==========================================================
 # PASTE YOUR GROQ API KEY HERE
 # ==========================================================
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "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"
 
 # ==========================================================
 # FLASK APPLICATION SETUP
